@@ -45,15 +45,16 @@ function gkFieldContextDef() {
 	this.frameRateDisplayCount = 0;
 	this.maxElevationMove = 11;
 	this.oldAvatarDestination = undefined;
-	this.baseLayer = "gkTerrainBaseLayer"
-	this.gridListLayer = "gkTerrainGridListLayer"
-	this.defsTerrainPrefix = "t_"
-	this.defsObjectPrefix = "o_"
-	this.useObjectPrefix = "u_"
-	this.useTextPrefix = "x_"
-	this.useGPrefix = "g_"
-	this.terrainTilePrefix = "ti_"
-	this.terrainObjectPrefix = "to_"
+	this.baseLayer = "gkTerrainBaseLayer";
+	this.gridListLayer = "gkTerrainGridListLayer";
+	this.EditLayer = "gkTerrainEditLayer";
+	this.defsTerrainPrefix = "t_";
+	this.defsObjectPrefix = "o_";
+	this.useObjectPrefix = "u_";
+	this.useTextPrefix = "x_";
+	this.useGPrefix = "g_";
+	this.terrainTilePrefix = "ti_";
+	this.terrainObjectPrefix = "to_";
 }
 
 function gkFieldInit() {
@@ -85,6 +86,7 @@ function gkFieldRefObjectDef(id, userName, isoXYZCurrent, isoXYZDestination, ori
 		this.pushIsoXYZDestination = isoXYZ;
 	}
 }
+
 // add an svg image into the field
 function gkFieldAddSvg(jsonData, rawSvgData) {
 //console.log("gkFieldAddSvg id: " + jsonData.id);
@@ -534,7 +536,9 @@ function gkFieldNewPodTitleReq(jsonData) {
 
 //	v = document.getElementById("podTitle");
 //	v.innerHTML = jsonData.podTitle;
-	gkFieldContext.podTitle = jsonData.podTitle
+
+	gkFieldContext.podId = jsonData.podId;
+	gkFieldContext.podTitle = jsonData.podTitle;
 	gkControlSetPodTitle();
 }
 
@@ -611,6 +615,22 @@ function gkFieldAddGridListEntry(gridListIndexName) {
 	gridListLayer.appendChild(g);
 }
 
+// add another grid list entry if it does not already exist
+function gkFieldAppendGridListEntry(gridListIndexName) {
+	console.log("appending gridListIndexName: " + gridListIndexName);
+
+	var gridListLayer = document.getElementById(gkFieldContext.gridListLayer);
+
+	var g = document.getElementById(gridListIndexName);
+
+	if (g == undefined) {
+		var g = document.createElementNS(gkIsoContext.svgNameSpace,"g");
+		g.id = gridListIndexName;
+console.log("setting g id: " + g.id);
+		gridListLayer.appendChild(g);
+	}
+}
+
 function gkFieldAddObjectToGridList(hrefPrefix, refId, objectName, isoXYZ, originX, originY, originZ, podId, destination) {
 
 	var ref = document.createElementNS(gkIsoContext.svgNameSpace,"use");
@@ -642,6 +662,7 @@ function gkFieldAddTerrainObject(hrefPrefix, refId, objectName, isoXYZ, originX,
 	ref.setAttributeNS(gkIsoContext.xlinkNameSpace,"href","#" + hrefPrefix + objectName);
 	ref.id = gkFieldContext.useObjectPrefix + refId;
 
+console.log("adding with id: " + ref.id);
 	var useG = document.createElementNS(gkIsoContext.svgNameSpace,"g");
 	useG.id = gkFieldContext.useGPrefix + objectName;
 	gkIsoSetSvgObjectPositionWithOffset(useG, isoXYZ, originX, originY, originZ);
@@ -650,6 +671,15 @@ function gkFieldAddTerrainObject(hrefPrefix, refId, objectName, isoXYZ, originX,
 	var baseLayer = document.getElementById(gkFieldContext.baseLayer);
 
 	baseLayer.appendChild(useG);
+}
+
+function gkFieldDeleteTerrainObject(objectId) {
+	var ref = document.getElementById(gkFieldContext.useObjectPrefix + objectId);
+
+console.log("trying to remove with id: " + gkFieldContext.useObjectPrefix + objectId);
+	if (ref != undefined) {
+		ref.parentNode.removeChild(ref);
+	}
 }
 
 function gkFieldChangeGridListPosition(refObject) {
@@ -671,3 +701,8 @@ function gkFieldChangeGridListPosition(refObject) {
 		gridListG.appendChild(ref);
 	}
 }
+
+function gkFieldGetCurrentPodId() {
+	return gkFieldContext.podId;
+}
+

@@ -24,7 +24,15 @@ function gkEventInit(websocketAddressPrefx, websocketPath, audioPathPrefix, sess
 }
 
 function gkEventDoClick(e) {
-	gkFieldHandleFieldClick(e.pageX, e.pageY);
+	console.log("gkEventDoClick");
+
+	if ((!gkControlIsMenuUp()) || (e.pageX > gkControlGetMenuWidth()) || (e.pageY > gkControlGetMenuHeight())) {
+		if (gkTerrainEditNeedClick()) {
+			gkTerrainEditHandleClick(e.pageX, e.pageY);
+		} else {
+			gkFieldHandleFieldClick(e.pageX, e.pageY);
+		}
+	}
 }
 
 function gkEventChangeAvatar() {

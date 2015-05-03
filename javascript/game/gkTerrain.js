@@ -225,6 +225,76 @@ console.log("objectList.length: " + jsonData.oList.length);
 	gkViewRender();
 }
 
+function gkTerrainAddTile(x, y, terrainName, idPrefix) {
+	console.log("gkTerrainAddTile");
+
+	var zList = new Array();
+	zList.push(0);
+
+	var isoXYZ = gkViewConvertWinToIso(x, gkViewContext.marginX, y, gkViewContext.marginY, 0);
+
+	isoXYZ.x = gkIsoGetFernFromDecifern(isoXYZ.x);
+	isoXYZ.y = gkIsoGetFernFromDecifern(isoXYZ.y);
+
+	var terrainMapMapEntry = new gkTerrainMapMapEntryDef(isoXYZ.x, isoXYZ.y, zList, terrainName);
+
+
+console.log("add: " + isoXYZ.x + "," + isoXYZ.y + " " + terrainName);
+	var mapKey = gkTerrainGetMapKey(isoXYZ.x, isoXYZ.y);
+
+	if (gkTerrainContext.terrainMapMap[mapKey] == undefined) {
+		gkTerrainContext.terrainMapMap[mapKey] = terrainMapMapEntry;
+	}
+
+	var terrainSvgMapEntry = gkTerrainGetSvgMapEntry(terrainName);
+
+	if (terrainSvgMapEntry != undefined) {
+		gkFieldAddTerrainObject(gkFieldContext.defsTerrainPrefix, idPrefix + mapKey, terrainName, isoXYZ, terrainSvgMapEntry.originX, terrainSvgMapEntry.originY, terrainSvgMapEntry.originZ);
+	}
+
+	var gridListIndexName = gkIsoGetGridListIndexName(isoXYZ.x, isoXYZ.y, 0);
+	gkFieldAppendGridListEntry(gridListIndexName);
+
+	gkViewRender()
+}
+
+function gkTerrainRemoveTile(x, y, idPrefix) {
+	console.log("gkTerrainRemoveTile");
+
+	var isoXYZ = gkViewConvertWinToIso(x, gkViewContext.marginX, y, gkViewContext.marginY, 0);
+
+	var isoX = gkIsoGetFernFromDecifern(isoXYZ.x);
+	var isoY = gkIsoGetFernFromDecifern(isoXYZ.y);
+
+	var mapKey = gkTerrainGetMapKey(isoX, isoY);
+
+	if (gkTerrainContext.terrainMapMap[mapKey] != undefined) {
+		delete gkTerrainContext.terrainMapMap[mapKey];
+	}
+
+	gkFieldDeleteTerrainObject(idPrefix + mapKey);
+
+	gkViewRender();
+}
+
+function gkTerrainSetAttribute(x, y, idPrefix) {
+	console.log("gkTerrainSetAttribute");
+
+	var isoXYZ = gkViewConvertWinToIso(x, gkViewContext.marginX, y, gkViewContext.marginY, 0);
+
+	var isoX = gkIsoGetFernFromDecifern(isoXYZ.x);
+	var isoY = gkIsoGetFernFromDecifern(isoXYZ.y);
+
+	var mapKey = gkTerrainGetMapKey(isoX, isoY);
+
+	if (gkTerrainContext.terrainMapMap[mapKey] != undefined) {
+		var attributeName = gkTerrainEditGetAttributeText();
+		gkTerrainContext.terrainMapMap[mapKey][attributeName] = true;
+	}
+
+	gkViewRender();
+}
+
 function gkTerrainClearMoveMarker() {
 	if (gkTerrainContext.moveMarker != null) {
 		var objectLayer = document.getElementById("gkTerrainObjectLayer");
@@ -342,5 +412,18 @@ function gkTerrainGetSvgMapEntry(terrainName) {
 	svgMapEntry = gkTerrainContext.terrainSvgMap[terrainName]
 
 	return svgMapEntry
+}
+
+function gkTerrainGetCurrentTerrain() {
+	var totalTerrain = new Object();
+
+
+	totalTerrain.podId = gkFieldGetCurrentPodId();
+	totalTerrain.terrainMapMap = gkTerrainContext.terrainMapMap;
+	totalTerrain.terrainSvgMap = gkTerrainContext.terrainSvgMap;
+	totalTerrain.terrainWallMap = gkTerrainContext.terrainWallMap;
+	totalTerrain.terrainAudioMap = gkTerrainContext.terrainAudioMap;
+
+	return totalTerrain;
 }
 
